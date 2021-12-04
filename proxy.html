@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="root"></div>
+</body>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+
+    const apiX = {
+        getUsers(page) {
+            return axios.get('https://social-network.samuraijs.com/api/1.0//users?$page=' + page).then(response => response.data)
+        }
+    }
+
+    const proxy = {
+        requests: [],
+        startInterval() {
+          setInterval(() => {
+              if (this.requests.length > 0) {
+                  let request = this.requests.shift();
+                  request();
+              }
+
+          }, 120)
+        },
+        getUsers(page) {
+            return new Promise((resolve, reject) => {
+                let req = () => {
+                    apiX.getUsers(page).then(result => {
+                        resolve(result)
+                    })
+                }
+                this.requests.push(req)
+            })
+        }
+    }
+    proxy.startInterval()
+    let api = proxy;
+
+    const app = {
+        users: [],
+        getUsers() {
+            let promises = [];
+            for (let i = 1; i < 50; i++) {
+                let pr = api.getUsers(i).then(data => {
+                    this.users = [...this.users, ...data.items];
+                })
+                promises.push(pr);
+            }
+            return Promise.all(promises)
+        }
+    }
+
+    const view = {
+        render() {
+
+            app.getUsers().then(() => {
+                let root = document.getElementById("root")
+                console.log('users:', app.users)
+                app.users.forEach(user => {
+                    let div = document.createElement('div')
+                    div.innerHTML = user.name
+                    root.appendChild(div)
+                })
+            })
+        }
+    }
+
+    view.render()
+</script>
+</html>
