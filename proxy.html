@@ -25,7 +25,7 @@
                   request();
               }
 
-          }, 1000)
+          }, 150)
         },
         getUsers(page) {
             return new Promise((resolve, reject) => {
@@ -45,7 +45,7 @@
         users: [],
         getUsers() {
             let promises = [];
-            for (let i = 1; i < 50; i++) {
+            for (let i = 1; i < 30; i++) {
                 let pr = api.getUsers(i).then(data => {
                     this.users = [...this.users, ...data.items];
                 })
